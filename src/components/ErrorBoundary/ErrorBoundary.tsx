@@ -27,7 +27,18 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   };
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary atrapó un error:', error, errorInfo);
+    //console.error('ErrorBoundary atrapó un error:', error, errorInfo);
+    /*const webhookURL = "http://localhost:5000/send-error-to-slack";
+    fetch(webhookURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: `Error: ${error.toString()}\nInfo: ${errorInfo.componentStack}`,
+      }),
+    }).catch((err) => console.error("Failed to send error to Slack", err)); */
+
     /*        
     // Estructura para reportar errores al sistema de monitoreo
     const report = {

@@ -1,7 +1,9 @@
 import useErrorHandler from "../../hooks/useErrorHandler";
+import useSlackError from "../../hooks/useSlackError";
 
 export const MyComponent = () => {
   const { createError, throwError } = useErrorHandler();
+  const { sendErrorToSlack } = useSlackError();
 
   const handleClick = () => {
     const error = createError(
@@ -11,6 +13,8 @@ export const MyComponent = () => {
       'USER_LOAD_ERROR'
     );
     throwError(error);
+    sendErrorToSlack(error, "Detalles adicionales sobre el contexto");
+
   };
 
   return (
