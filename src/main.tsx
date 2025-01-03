@@ -8,8 +8,14 @@ import ErrorTemplate from './components/ErrorTemplate/ErrorTemplate.tsx'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary
-      fallback={(error, resetErrorBoundary) => (
-        <ErrorTemplate error={error} onRetry={resetErrorBoundary} />
+    
+      fallbackRender={({ error, errorInfo, resetErrorBoundary }) =>  (
+        <ErrorTemplate 
+          error={error} 
+          errorInfo={errorInfo}
+          onRetry={resetErrorBoundary} 
+          supportLink=""
+        />
       )}
     >
       <App />

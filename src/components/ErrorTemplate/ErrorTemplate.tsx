@@ -2,10 +2,12 @@ import React from 'react';
 
 interface ErrorTemplateProps {
   error: Error;
+  errorInfo: React.ErrorInfo | null;
   onRetry: () => void;
+  supportLink: string;
 }
 
-const ErrorTemplate: React.FC<ErrorTemplateProps> = ({ error, onRetry }) => {
+const ErrorTemplate: React.FC<ErrorTemplateProps> = ({ error, errorInfo, onRetry, supportLink }) => {
   return (
     <div style={{ textAlign: 'center', padding: '2rem', fontFamily: 'Arial, sans-serif' }}>
       <img
@@ -18,6 +20,8 @@ const ErrorTemplate: React.FC<ErrorTemplateProps> = ({ error, onRetry }) => {
       <details style={{ textAlign: 'left', maxWidth: '400px', margin: '1rem auto', color: '#777' }}>
         <summary>Error Details</summary>
         {error.message}
+        <br />
+        {JSON.stringify(errorInfo)}
       </details>
       <button
         onClick={onRetry}
@@ -33,6 +37,7 @@ const ErrorTemplate: React.FC<ErrorTemplateProps> = ({ error, onRetry }) => {
       >
         Retry
       </button>
+      {supportLink}
     </div>
   );
 };

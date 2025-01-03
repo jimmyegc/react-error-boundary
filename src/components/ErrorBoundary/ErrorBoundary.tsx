@@ -3,70 +3,71 @@ import './ErrorBoundary.css';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
-  fallback?: (error: Error, resetErrorBoundary: () => void) => ReactNode;
-  //onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  fallbackRender: (props: {
+    error: Error;
+    errorInfo: React.ErrorInfo;
+    resetErrorBoundary: () => void;
+  }) => ReactNode;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  errorInfo: React.ErrorInfo | null;
 }
 
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null,
+    };
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+  async componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    this.setState({ hasError: true, error, errorInfo });
+
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
+    
+    try {      
+      const response = await fetch('https://nodejs-postgresql-api-render.onrender.com/report-error', {
+      //const response = await fetch('http://localhost:3000/report-error', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ error, additionalInfo: JSON.stringify(errorInfo) }),
+      });
+  
+      if (!response.ok) {
+        console.error('Error al reportar al servidor:', response.statusText);
+      } else {
+        console.log('Error reportado con éxito.');
+      }
+    } catch (err) {
+      console.error('Error al enviar la solicitud:', err);
+    }
   }
 
-  resetError = () => {
-    this.setState({ hasError: false, error: null });
+  resetErrorBoundary = () => {
+    this.setState({ hasError: false, error: null, errorInfo: null });
   };
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    //console.error('ErrorBoundary atrapó un error:', error, errorInfo);
-    /*const webhookURL = "http://localhost:5000/send-error-to-slack";
-    fetch(webhookURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        text: `Error: ${error.toString()}\nInfo: ${errorInfo.componentStack}`,
-      }),
-    }).catch((err) => console.error("Failed to send error to Slack", err)); */
-
-    /*        
-    // Estructura para reportar errores al sistema de monitoreo
-    const report = {
-      message: error.message,
-      componentName: (error as CustomError).componentName || 'Desconocido',
-      stack: error.stack || 'Sin stack',
-      errorCode: (error as CustomError).errorCode || 'UNHANDLED_ERROR',
-      context: (error as CustomError).context || {},
-      componentStack: errorInfo.componentStack, // Detalles específicos de React
-      timestamp: new Date().toISOString(),
-    };
-  
-    // Aquí puedes enviar el error a Bugsnag, Sentry, etc.
-    if (this.props.onError) {
-      this.props.onError(report, errorInfo);
-    }
-    */
-  }
-
   render() {
-    const { hasError, error } = this.state;
-    const { fallback, children } = this.props;
-
-    if (hasError && error) {
-      return fallback ? fallback(error, this.resetError) : <div>Something went wrong!</div>;
+    if (this.state.hasError && this.state.error && this.state.errorInfo) {
+      return this.props.fallbackRender({
+        error: this.state.error,
+        errorInfo: this.state.errorInfo,
+        resetErrorBoundary: this.resetErrorBoundary,
+      });
     }
 
-    return children;
+    return this.props.children;
   }
 }
 
