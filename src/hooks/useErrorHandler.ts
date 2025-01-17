@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
 
-interface CustomError extends Error {
+export interface CustomError extends Error {
   componentName: string; // Dónde ocurrió (e.g., 'LoginForm')
   errorCode?: string;    // Código único para identificar el tipo de error
-  context?: Record<string, any>; // Información contextual relevante
+  context?: any; //Record<string, any>; // Información contextual relevante
 }
 
 interface UseErrorHandlerReturn {
